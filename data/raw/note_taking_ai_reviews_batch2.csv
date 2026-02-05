@@ -1,0 +1,11 @@
+app_id,app_name,reviewId,userName,score,content,thumbsUpCount,at
+com.otter.ai,Otter AI,r_2001,Amina,5,"Great transcription quality.",4,2025-02-01 09:10:00
+com.otter.ai,Otter AI,r_2002,Youssef,2,"Too expensive for premium.",1,2025-02-01 10:45:00
+com.notewise.ai,Notewise,r_2003,Sara,4,"Clean UI and fast.",3,2025-02-01 11:30:00
+com.notewise.ai,Notewise,r_2004,Omar,2,"Crashes sometimes.",0,2025-02-01 12:00:00
+com.ghost.notes,Ghost Notes AI,r_2005,Leila,5,"Amazing features!",5,2025-02-02 08:20:00
+com.ghost.notes,Ghost Notes AI,r_2006,Hamza,3,"Needs more languages.",2,2025-02-02 09:15:00
+com.otter.ai,Otter AI,r_2007,Nadia,1,"Stopped syncing.",0,2025-02-02 10:00:00
+com.otter.ai,Otter AI,r_2008,Rachid,2,"Battery drain issue.",0,2025-02-02 10:00:00
+com.otter.ai,Otter AI,r_2002,Youssef,2,"Too expensive for premium.",1,2025-02-01 10:45:00
+com.newnote.ai,NewNote,r_2009,Kenza,3,"Promising but buggy.",1,2025-02-02 11:30:00

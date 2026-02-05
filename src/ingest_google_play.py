@@ -6,7 +6,7 @@ from google_play_scraper import search, app, reviews_all
 # --------------------------------------------------
 # Configuration
 # --------------------------------------------------
-RAW_DATA_DIR = r"C:\Users\hp\Desktop\DATA-ENGINEERING\DATA-ENGINEERING\DATA-ENGINEERING-PROJECT\data\raw"
+RAW_DATA_DIR = r"data\raw"
 APPS_METADATA_PATH = os.path.join(RAW_DATA_DIR, "apps_metadata.json")
 APPS_REVIEWS_PATH = os.path.join(RAW_DATA_DIR, "apps_reviews.jsonl")
 
