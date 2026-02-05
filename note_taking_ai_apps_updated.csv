@@ -1,0 +1,11 @@
+appId,title,developer,score,ratings,installs,genre,price
+com.otter.ai,Otter AI,Otter.ai,4.3,22716,"1,000,000+",Productivity,0
+com.notewise.ai,Notewise,Notewise Inc.,4.6,1200,500000,Productivity,0
+com.otter.ai,Otter AI Duplicate,Fake Dev,3.1,120,10000,Productivity,0
+com.newnote.ai,NewNote,NewNote Labs,4.0,85,25000,Productivity,0
+com.ghost.notes,Ghost Notes AI,Ghost Team,4.8,12,1200,Education,0
+com.unknown.ai,Unknown Notes,Unknown Dev,,,,"",Education,
+com.transcribo.ai,Transcribo,Transcribo Ltd,4.2,640,78000,Productivity,0
+com.lecturenote.ai,LectureNote AI,LectureNote Studio,4.5,310,34000,Education,0
+com.memo.ai,Memo AI,Memo Corp,4.1,980,"50,000+",Productivity,0
+com.notepadx.ai,NotepadX,NotepadX, ,45,12000,Productivity,0
