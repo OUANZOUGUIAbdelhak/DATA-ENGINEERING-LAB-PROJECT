@@ -1,0 +1,20 @@
+New Reviews Batch (batch2.csv)
+  Ingestion Change: The pipeline now uses pd.read_csv() and JSONL parsing depending on the file (this is because we have two source and from what i understood from the lab we should keep both) and removes trailing empty rows.
+  Full Refresh Risk: Output files are overwritten with to_csv(), so historical data is lost unless handled manually. (Sadly this is the only method in pandas i think there are complexe ways to not do a full refresh but necessitate more code ill do it if needed)
+  Duplicates: Duplicate review IDs aren’t filtered, which can inflate review counts.
+  Unknown Apps: Reviews for unknown apps are kept, but metadata fields end up as NaN.
+
+Schema Drift in Reviews (schema_drift.csv)
+  Hard-coded Logic: Column names, join keys, and output schema are fixed in code.
+  Failure Mode: The pipeline crashes with a KeyError if a column is renamed and not remapped (comes from the pandas library API)
+  Maintainability: Fixes are localized but fragile—small schema changes require manual updates.
+
+Dirty and Inconsistent Data (dirty.csv)
+  Invalid Values: Bad ratings and timestamps are coerced to NaN. (using to_numeric and filters that filter ratings above 5 and under 0)
+  Filtering: Invalid records are removed before writing the final dataset. (i use remove a raise a warning because sometimes removing the + can give innacurate data sometimes)
+  Early Detection: Data quality issues are visible early by tracking NaN counts.
+
+Updated Applications Metadata (apps_updated.csv)
+  Duplicates: Duplicate app IDs are removed to avoid join explosions. (For now i keep the first duplicate in the case of the data we have the duplicates have the same value on all lines if its wasnt the case we should favor the most stable one)
+  Join Strategy: A left join keeps reviews even when app metadata is missing.
+  Impact: Undeduplicated metadata causes inflated KPIs, which are immediately noticeable. and cause skewed analysis
