@@ -1,0 +1,11 @@
+appId,appTitle,review_id,username,rating,review_text,likes,review_time
+com.otter.ai,Otter AI,r_2201,Amina,4,"Works well overall.",2,2025/02/05 08:00
+com.notewise.ai,Notewise,r_2202,Youssef,2,"Too many ads.",0,2025/02/05 08:30
+com.otter.ai,Otter AI,r_2203,Sara,5,"Love transcription quality.",5,2025/02/05 09:00
+com.notewise.ai,Notewise,r_2204,Omar,2,"Laggy after update.",1,2025/02/05 09:15
+com.notewise.ai,Notewise,r_2205,Leila,4,"Good for lectures.",3,2025/02/05 09:45
+com.otter.ai,Otter AI,r_2206,Hamza,1,"Login issues.",0,2025/02/05 10:00
+com.newnote.ai,NewNote,r_2207,Nadia,3,"Decent but lacks features.",2,2025/02/05 10:30
+com.newnote.ai,NewNote,r_2208,Rachid,1,"Very unstable.",0,2025/02/05 11:00
+com.otter.ai,Otter AI,r_2209,Kenza,4,"Nice UI.",2,2025/02/05 11:15
+com.otter.ai,Otter AI,r_2210,Samir,2,"Export feature broken.",1,2025/02/05 11:45

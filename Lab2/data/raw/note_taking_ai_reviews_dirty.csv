@@ -1,0 +1,11 @@
+app_id,app_name,reviewId,userName,score,content,thumbsUpCount,at
+com.otter.ai,Otter AI,r_2101,Imane,five,"Love it!",2,2025-02-10 09:00:00
+com.otter.ai,Otter AI,r_2102,Ali,-1,"Worst update ever.",0,2025-02-10 09:30:00
+com.notewise.ai,Notewise,r_2103,Salma,3,"Okay app.",1,not_a_date
+com.notewise.ai,Notewise,r_2104,Mehdi,4,"NULL",NULL,2025-02-10 10:00:00
+com.notewise.ai,Notewise,r_2105,Hajar,,"Pretty useful.",2,2025-02-10 10:15:00
+com.otter.ai,Otter AI,r_2106,Yahya,5,"Excellent transcription.",5,2025-02-10 10:30:00
+com.otter.ai,Otter AI,r_2107,Meryem,2,"Slow sync.",,2025-02-10 11:00:00
+com.newnote.ai,NewNote,r_2108,Samir,4,"Promising.",1,2025-02-10 11:30:00
+com.newnote.ai,NewNote,r_2109,Aya,0,"Terrible UX.",0,2025-02-10 12:00:00
+com.newnote.ai,NewNote,r_2110,Noor,1,"Crashes often.",3,2025-02-10 12:30:00
