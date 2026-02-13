@@ -5,7 +5,7 @@
 graph LR
     API["Google Play API"] -->|Python Script from Lab1| RawFiles["Raw JSON/JSONL"]
     RawFiles -->|DuckDB Load| Bronze["Staging Tables"]
-    Bronze -->|dbt Transform| Silver["Intermediate Tables"]
+    Bronze -->|dbt Transform| Silver["Intermediate Tables (Not in pdf but good for Medallions Architechture)"]
     Silver -->|dbt Transform| Gold["Star Schema(Facts/Dims)"]
     Gold -->|Connectors| BI["BI Tools (PowerBI)"]
     
@@ -30,79 +30,93 @@ We want to analyze the reception of applications by tracking user reviews and ra
 **"One row in the fact table represents one individual review posted by a user for a specific app at a specific point in time."**
 
 ### 3. Identify the Dimensions
-The "who, what, where, when" context to the facts
+The "who, what, when" context to the facts. The analysis will be centered around the application, the developer, the category, and the date.
 
-*   **Dim_App**: Describes the **"What"** (the application being reviewed).
-    *   *Source*: `apps_metadata.json`
-    *   *Attributes*: `App_Key` (Surrogate Key), `App_ID` (Natural Key), `Title`, `Developer`, `Genre`, `Category`, `Price`, `Free/Paid Status`, `Content Rating`, `Release Date`, `Current Version`.
-    
-*   **Dim_Date**: Describes the **"When"** (date of the review).
-    *   *Source*: Derived from `at` timestamp in `apps_reviews.jsonl`.
-    *   *Attributes*: `Date_Key`, `Full_Date`, `Year`, `Quarter`, `Month`, `Day`, `Day_of_Week`, `Is_Weekend`.
+*   **dim_apps**: Describes the application being reviewed.
+    *   *Attributes*: `app_key` (PK), `app_id` (Natural Key), `app_name`, `developer_key` (FK), `category_key` (FK), `price`, `is_paid`, `installs`, `catalog_rating`, `ratings_count`.
 
-*   **Dim_User**: Describes the **"Who"** (the user who wrote the review).
-    *   *Source*: `apps_reviews.jsonl`
-    *   *Attributes*: `User_Key`, `User_Name`, `User_Image_URL`. 
-    *   *Note*: In the dataset, user information might be limited or anonymized (e.g., "A Google User"), but structurally it remains a dimension.
+*   **dim_developers**: Describes the developer of the application.
+    *   *Attributes*: `developer_key` (PK), `developer_name`, `developer_website`, `developer_email`.
+
+*   **dim_categories**: Describes the category of the application.
+    *   *Attributes*: `category_key` (PK), `category_name`.
+
+*   **dim_date**: Describes the date of the review.
+    *   *Attributes*: `date_key` (PK), `date`, `year`, `month`, `quarter`, `day_of_week`, `is_weekend`.
 
 ### 4. Identify the Facts
 
-*   **Fact_Reviews**:
-    *   *Source*: `apps_reviews.jsonl`
-    *   *Measures*:
-        *   `Score`: The numerical rating (1-5 stars). Aggregations: Average, Min, Max, Count.
-        *   `Thumbs_Up_Count`: Number of upvotes the review received. Aggregations: Sum, Average.
-        *   `Review_Count`: Explicit count of reviews (1 per row). Aggregations: Sum.
+*   **fact_reviews**:
+    *   *Measures*: `rating` (1-5), `thumbs_up_count`.
+    *   *Keys*: `review_id` (PK), `app_key` (FK), `developer_key` (FK), `date_key` (FK).
+    *   *Attributes*: `review_text`, `review_version`.
 
 ### 5. Bus Matrix
 
-| Business Process | Fact Table | Dim_App | Dim_Date | Dim_User |
-| :--- | :--- | :---: | :---: | :---: |
-| **User Reviews** | **Fact_Reviews** | **X** | **X** | **X** |
+| Business Process | Fact Table | dim_apps | dim_developers | dim_categories | dim_date |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **User Reviews** | **fact_reviews** | **X** | **X** | **X** | **X** |
 
-### 6. Star Schema Design
+*(Note: Developers and Categories are linked directly or transitively via Apps).*
 
-#### Table: `Fact_Reviews`
+### 6. Star Schema / Snowflake Design
+
+The schema follows a Snowflake-like structure where dimension tables (`dim_apps`) are normalized into sub-dimensions (`dim_developers`, `dim_categories`). `fact_reviews` references `dim_apps`, `dim_developers`, and `dim_date`.
+
+#### Table: `fact_reviews`
 | Column Name | Type | Description |
 | :--- | :--- | :--- |
-| `review_id` | STRING | Primary Key (Natural) |
-| `app_key` | INT | FK to Dim_App |
-| `date_key` | INT | FK to Dim_Date |
-| `user_key` | INT | FK to Dim_User |
-| `score` | INT | Rating given (1-5) |
-| `thumbs_up_count` | INT | Count of helpful votes |
-| `review_content` | TEXT | The actual text of the review (Degenerate Dim) |
-| `app_version` | STRING | App version at time of review (Degenerate Dim) |
+| `review_id` | INTEGER | Primary Key |
+| `app_key` | INTEGER | FK to dim_apps |
+| `developer_key` | INTEGER | FK to dim_developers |
+| `date_key` | INTEGER | FK to dim_date |
+| `rating` | INTEGER | Rating given (1-5) |
+| `thumbs_up_count` | INTEGER | Count of helpful votes |
+| `review_text` | TEXT | Review content |
+| `review_version` | VARCHAR | App version at time of review |
 
-#### Table: `Dim_App`
+#### Table: `dim_apps`
 | Column Name | Type | Description |
 | :--- | :--- | :--- |
-| `app_key` | INT | Surrogate Primary Key |
-| `app_id` | STRING | Natural Key (e.g., com.google...) |
-| `title` | STRING | App Name |
-| `developer` | STRING | Developer Name |
-| `genre` | STRING | Primary Genre |
-| `price` | DECIMAL | App Price |
-| `is_free` | BOOLEAN | Free/Paid indicator |
+| `app_key` | INTEGER | Primary Key |
+| `app_id` | VARCHAR | Natural Key (e.g., com.google...) |
+| `app_name` | VARCHAR | App Title |
+| `developer_key` | INTEGER | FK to dim_developers |
+| `category_key` | INTEGER | FK to dim_categories |
+| `price` | NUMERIC | App Price |
+| `is_paid` | BOOLEAN | Free/Paid indicator |
+| `installs` | VARCHAR | Install count range |
+| `catalog_rating` | NUMERIC | Average rating on store (not review specific) |
+| `ratings_count` | INTEGER | Total ratings count on store |
 
-#### Table: `Dim_Date`
+#### Table: `dim_developers`
 | Column Name | Type | Description |
 | :--- | :--- | :--- |
-| `date_key` | INT | Primary Key (YYYYMMDD) |
+| `developer_key` | INTEGER | Primary Key |
+| `developer_name` | VARCHAR | Developer Name |
+| `developer_website` | VARCHAR | Website URL |
+| `developer_email` | VARCHAR | Contact Email |
+
+#### Table: `dim_categories`
+| Column Name | Type | Description |
+| :--- | :--- | :--- |
+| `category_key` | INTEGER | Primary Key |
+| `category_name` | VARCHAR | Category Name |
+
+#### Table: `dim_date`
+| Column Name | Type | Description |
+| :--- | :--- | :--- |
+| `date_key` | INTEGER | Primary Key (YYYYMMDD) |
 | `date` | DATE | Full Date |
-| `year` | INT | Year |
-| `month` | INT | Month (1-12) |
-| `month_name` | STRING | Month Name |
-| `day` | INT | Day of Month |
-
-#### Table: `Dim_User`
-| Column Name | Type | Description |
-| :--- | :--- | :--- |
-| `user_key` | INT | Surrogate Primary Key |
-| `user_name` | STRING | User display name |
-| `user_image` | STRING | URL to user profile image |
+| `year` | INTEGER | Year |
+| `month` | INTEGER | Month (1-12) |
+| `quarter` | INTEGER | Quarter (1-4) |
+| `day_of_week` | INTEGER | Day of Week (1-7) |
+| `is_weekend` | BOOLEAN | Weekend Indicator |
 
 ### 7. Validation Against Analytical Needs
-*   **"Which app has the best ratings?"**:  Query `Fact_Reviews` joined with `Dim_App`, grouping by `Dim_App.title` and averaging `Fact_Reviews.score`.
-*   **"How have reviews changed over time?"**: Query `Fact_Reviews` joined with `Dim_Date`, grouping by `Dim_Date.month` and counting `review_id`.
-*   **"Which developer has the most reviews?"**: Query `Fact_Reviews` joined with `Dim_App`, grouping by `Dim_App.developer`.
+*   **"Which app has the best ratings?"**:  Query `fact_reviews` joined with `dim_apps`, grouping by `dim_apps.app_name` and averaging `fact_reviews.rating`.
+*   **"How have reviews changed over time?"**: Query `fact_reviews` joined with `dim_date`, grouping by `dim_date.month` and counting `review_id`.
+*   **"Which developer has the most reviews?"**: Query `fact_reviews` joined with `dim_developers`, grouping by `dim_developers.developer_name`.
+
+This model supports all required analytical capabilities efficiently.
