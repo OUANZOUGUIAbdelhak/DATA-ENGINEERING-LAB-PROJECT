@@ -7,7 +7,7 @@ graph LR
     RawFiles -->|DuckDB Load| Bronze["Staging Tables"]
     Bronze -->|dbt Transform| Silver["Intermediate Tables"]
     Silver -->|dbt Transform| Gold["Star Schema(Facts/Dims)"]
-    Gold -->|JDBC/ODBC| BI["BI Tools (PowerBI/Metabase)"]
+    Gold -->|Connectors| BI["BI Tools (PowerBI)"]
     
     subgraph DuckDB
         Bronze
