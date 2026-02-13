@@ -25,17 +25,18 @@ The objective of Lab 2 is to modernize the data pipeline by introducing standard
 **Architecture Diagram Concept:**
 ```mermaid
 graph LR
-    API[Google Play API] -->|Python Script| RawFiles[Raw JSON/JSONL]
-    RawFiles -->|DuckDB Load| Bronze[Staging Tables]
-    Bronze -->|dbt Transform| Silver[Intermediate Tables]
-    Silver -->|dbt Transform| Gold[Star Schema (Facts/Dims)]
-    Gold -->|JDBC/ODBC| BI[BI Tools (PowerBI/Metabase)]
+    API["Google Play API"] -->|Python Script| RawFiles["Raw JSON/JSONL"]
+    RawFiles -->|DuckDB Load| Bronze["Staging Tables"]
+    Bronze -->|dbt Transform| Silver["Intermediate Tables"]
+    Silver -->|dbt Transform| Gold["Star Schema (Facts/Dims)"]
+    Gold -->|JDBC/ODBC| BI["BI Tools (PowerBI/Metabase)"]
     
     subgraph DuckDB
         Bronze
         Silver
         Gold
     end
+
 ```
 
 ---
