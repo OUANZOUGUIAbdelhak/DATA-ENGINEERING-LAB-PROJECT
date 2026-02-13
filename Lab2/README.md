@@ -24,14 +24,13 @@ graph LR
 We adopt the Kimball methodology to design a dimensional model optimized for analytical queries rather than transaction processing.
 
 ### 1. Identify the Business Process
-The core business process we are modeling is **User Feedback Capturing**. We want to analyze the reception of applications by tracking user reviews and ratings over time. This allows us to understand user sentiment, app popularity, and performance trends.
+We want to analyze the reception of applications by tracking user reviews and ratings over time.
 
 ### 2. Declare the Grain
-The grain defines the most atomic level of data in the fact table.
 **"One row in the fact table represents one individual review posted by a user for a specific app at a specific point in time."**
 
 ### 3. Identify the Dimensions
-Dimensions provide the "who, what, where, when" context to the facts.
+The "who, what, where, when" context to the facts
 
 *   **Dim_App**: Describes the **"What"** (the application being reviewed).
     *   *Source*: `apps_metadata.json`
@@ -46,11 +45,7 @@ Dimensions provide the "who, what, where, when" context to the facts.
     *   *Attributes*: `User_Key`, `User_Name`, `User_Image_URL`. 
     *   *Note*: In the dataset, user information might be limited or anonymized (e.g., "A Google User"), but structurally it remains a dimension.
 
-*(Optional/Degenerate Dimensions)*: 
-*   **Version**: The specific version of the app being reviewed (`reviewCreatedVersion`). This can be a separate dimension or a degenerate dimension within the fact table depending on cardinality.
-
 ### 4. Identify the Facts
-Facts are the quantitative measurements resulting from the business process.
 
 *   **Fact_Reviews**:
     *   *Source*: `apps_reviews.jsonl`
@@ -60,15 +55,12 @@ Facts are the quantitative measurements resulting from the business process.
         *   `Review_Count`: Explicit count of reviews (1 per row). Aggregations: Sum.
 
 ### 5. Bus Matrix
-The Bus Matrix visualizes the relationship between the business process (Facts) and Dimensions.
 
 | Business Process | Fact Table | Dim_App | Dim_Date | Dim_User |
 | :--- | :--- | :---: | :---: | :---: |
 | **User Reviews** | **Fact_Reviews** | **X** | **X** | **X** |
 
 ### 6. Star Schema Design
-
-The resulting schema is a **Star Schema** with `Fact_Reviews` at the center, joined to the dimension tables.
 
 #### Table: `Fact_Reviews`
 | Column Name | Type | Description |
