@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: dim_developers
+    columns:
+      - name: developer_key
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_categories
+    columns:
+      - name: category_key
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_apps
+    columns:
+      - name: app_key
+        tests:
+          - unique
+          - not_null
+      - name: developer_key
+        tests:
+          - relationships:
+              to: ref('dim_developers')
+              field: developer_key
+      - name: category_key
+        tests:
+          - relationships:
+              to: ref('dim_categories')
+              field: category_key
+
+  - name: dim_date
+    columns:
+      - name: date_key
+        tests:
+          - unique
+          - not_null
