@@ -1,34 +1,12 @@
 # Data Engineering Lab 2: Architecture & Data Modeling
 
-## B. High-level Architecture
-
-The objective of Lab 2 is to modernize the data pipeline by introducing standard data engineering frameworks, moving away from ad-hoc Python logic for transformation and storage.
-
-### Pipeline Flow
-1.  **Ingestion (Extract)**: 
-    *   **Source**: Google Play Store API.
-    *   **Tool**: Existing Python scripts.
-    *   **Output**: Raw JSON (`apps_metadata.json`) and JSONL (`apps_reviews.jsonl`) files stored in the local filesystem (`data/raw`).
-
-2.  **Storage & Execution Engine**:
-    *   **Tool**: **DuckDB**.
-    *   **Role**: DuckDB serves as the unified analytical storage and execution engine. It ingests the raw JSON/JSONL data into staging tables and executes the transformation logic defined by dbt. Analysis-ready data (Star Schema) is stored within DuckDB.
-
-3.  **Transformation**:
-    *   **Orchestrator**: **dbt Core**.
-    *   **Role**: dbt defines the data models, performs testing (schema, referential integrity), and documents the pipeline. It compiles SQL (Jinja) into raw SQL that runs against DuckDB to transform staging data into a dimensional model.
-
-4.  **Serving**:
-    *   **Access**: **BI Tools** (PowerBI, Tableau, Metabase).
-    *   **Method**: BI tools connect directly to the DuckDB database to query the modeled data (Facts and Dimensions) for visualization and reporting.
-
 **Architecture Diagram Concept:**
 ```mermaid
 graph LR
-    API["Google Play API"] -->|Python Script| RawFiles["Raw JSON/JSONL"]
+    API["Google Play API"] -->|Python Script from Lab1| RawFiles["Raw JSON/JSONL"]
     RawFiles -->|DuckDB Load| Bronze["Staging Tables"]
     Bronze -->|dbt Transform| Silver["Intermediate Tables"]
-    Silver -->|dbt Transform| Gold["Star Schema (Facts/Dims)"]
+    Silver -->|dbt Transform| Gold["Star Schema(Facts/Dims)"]
     Gold -->|JDBC/ODBC| BI["BI Tools (PowerBI/Metabase)"]
     
     subgraph DuckDB
