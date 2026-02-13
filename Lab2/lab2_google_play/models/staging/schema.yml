@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: stg_playstore_apps
+    description: Staging model for Google Play Store Applications
+    columns:
+      - name: app_id
+        description: Primary key for apps
+        tests:
+          - unique
+          - not_null
+      - name: app_name
+        tests:
+          - not_null
+      - name: developer_name
+        tests:
+          - not_null
+
+  - name: stg_playstore_reviews
+    description: Staging model for User Reviews
+    columns:
+      - name: review_id
+        description: Primary key for reviews
+        tests:
+          - unique
+          - not_null
+      - name: app_id
+        description: Foreign key to apps
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_playstore_apps')
+              field: app_id
+      - name: rating
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]

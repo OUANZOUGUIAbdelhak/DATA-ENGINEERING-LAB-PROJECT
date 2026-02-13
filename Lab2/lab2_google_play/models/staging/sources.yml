@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: raw_data
+    schema: main
+    description: Raw data sources
+    tables:
+      - name: apps_metadata
+        description: Metadata for applications
+        meta:
+          external_location: "read_json_auto('data/raw/apps_metadata.json')"
+      
+      - name: apps_reviews
+        description: User reviews for applications
+        meta:
+          external_location: "read_json_auto('data/raw/apps_reviews.jsonl')"
