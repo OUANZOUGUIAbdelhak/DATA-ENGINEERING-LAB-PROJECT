@@ -1,0 +1,139 @@
+# Data Engineering Lab 2: Architecture & Data Modeling
+
+## B. High-level Architecture
+
+The objective of Lab 2 is to modernize the data pipeline by introducing standard data engineering frameworks, moving away from ad-hoc Python logic for transformation and storage.
+
+### Pipeline Flow
+1.  **Ingestion (Extract)**: 
+    *   **Source**: Google Play Store API.
+    *   **Tool**: Existing Python scripts.
+    *   **Output**: Raw JSON (`apps_metadata.json`) and JSONL (`apps_reviews.jsonl`) files stored in the local filesystem (`data/raw`).
+
+2.  **Storage & Execution Engine**:
+    *   **Tool**: **DuckDB**.
+    *   **Role**: DuckDB serves as the unified analytical storage and execution engine. It ingests the raw JSON/JSONL data into staging tables and executes the transformation logic defined by dbt. Analysis-ready data (Star Schema) is stored within DuckDB.
+
+3.  **Transformation**:
+    *   **Orchestrator**: **dbt Core**.
+    *   **Role**: dbt defines the data models, performs testing (schema, referential integrity), and documents the pipeline. It compiles SQL (Jinja) into raw SQL that runs against DuckDB to transform staging data into a dimensional model.
+
+4.  **Serving**:
+    *   **Access**: **BI Tools** (PowerBI, Tableau, Metabase).
+    *   **Method**: BI tools connect directly to the DuckDB database to query the modeled data (Facts and Dimensions) for visualization and reporting.
+
+**Architecture Diagram Concept:**
+```mermaid
+graph LR
+    API[Google Play API] -->|Python Script| RawFiles[Raw JSON/JSONL]
+    RawFiles -->|DuckDB Load| Bronze[Staging Tables]
+    Bronze -->|dbt Transform| Silver[Intermediate Tables]
+    Silver -->|dbt Transform| Gold[Star Schema (Facts/Dims)]
+    Gold -->|JDBC/ODBC| BI[BI Tools (PowerBI/Metabase)]
+    
+    subgraph DuckDB
+        Bronze
+        Silver
+        Gold
+    end
+```
+
+---
+
+## C. Data Modeling (Kimball Methodology)
+
+We adopt the Kimball methodology to design a dimensional model optimized for analytical queries rather than transaction processing.
+
+### 1. Identify the Business Process
+The core business process we are modeling is **User Feedback Capturing**. We want to analyze the reception of applications by tracking user reviews and ratings over time. This allows us to understand user sentiment, app popularity, and performance trends.
+
+### 2. Declare the Grain
+The grain defines the most atomic level of data in the fact table.
+**"One row in the fact table represents one individual review posted by a user for a specific app at a specific point in time."**
+
+### 3. Identify the Dimensions
+Dimensions provide the "who, what, where, when" context to the facts.
+
+*   **Dim_App**: Describes the **"What"** (the application being reviewed).
+    *   *Source*: `apps_metadata.json`
+    *   *Attributes*: `App_Key` (Surrogate Key), `App_ID` (Natural Key), `Title`, `Developer`, `Genre`, `Category`, `Price`, `Free/Paid Status`, `Content Rating`, `Release Date`, `Current Version`.
+    
+*   **Dim_Date**: Describes the **"When"** (date of the review).
+    *   *Source*: Derived from `at` timestamp in `apps_reviews.jsonl`.
+    *   *Attributes*: `Date_Key`, `Full_Date`, `Year`, `Quarter`, `Month`, `Day`, `Day_of_Week`, `Is_Weekend`.
+
+*   **Dim_User**: Describes the **"Who"** (the user who wrote the review).
+    *   *Source*: `apps_reviews.jsonl`
+    *   *Attributes*: `User_Key`, `User_Name`, `User_Image_URL`. 
+    *   *Note*: In the dataset, user information might be limited or anonymized (e.g., "A Google User"), but structurally it remains a dimension.
+
+*(Optional/Degenerate Dimensions)*: 
+*   **Version**: The specific version of the app being reviewed (`reviewCreatedVersion`). This can be a separate dimension or a degenerate dimension within the fact table depending on cardinality.
+
+### 4. Identify the Facts
+Facts are the quantitative measurements resulting from the business process.
+
+*   **Fact_Reviews**:
+    *   *Source*: `apps_reviews.jsonl`
+    *   *Measures*:
+        *   `Score`: The numerical rating (1-5 stars). Aggregations: Average, Min, Max, Count.
+        *   `Thumbs_Up_Count`: Number of upvotes the review received. Aggregations: Sum, Average.
+        *   `Review_Count`: Explicit count of reviews (1 per row). Aggregations: Sum.
+
+### 5. Bus Matrix
+The Bus Matrix visualizes the relationship between the business process (Facts) and Dimensions.
+
+| Business Process | Fact Table | Dim_App | Dim_Date | Dim_User |
+| :--- | :--- | :---: | :---: | :---: |
+| **User Reviews** | **Fact_Reviews** | **X** | **X** | **X** |
+
+### 6. Star Schema Design
+
+The resulting schema is a **Star Schema** with `Fact_Reviews` at the center, joined to the dimension tables.
+
+#### Table: `Fact_Reviews`
+| Column Name | Type | Description |
+| :--- | :--- | :--- |
+| `review_id` | STRING | Primary Key (Natural) |
+| `app_key` | INT | FK to Dim_App |
+| `date_key` | INT | FK to Dim_Date |
+| `user_key` | INT | FK to Dim_User |
+| `score` | INT | Rating given (1-5) |
+| `thumbs_up_count` | INT | Count of helpful votes |
+| `review_content` | TEXT | The actual text of the review (Degenerate Dim) |
+| `app_version` | STRING | App version at time of review (Degenerate Dim) |
+
+#### Table: `Dim_App`
+| Column Name | Type | Description |
+| :--- | :--- | :--- |
+| `app_key` | INT | Surrogate Primary Key |
+| `app_id` | STRING | Natural Key (e.g., com.google...) |
+| `title` | STRING | App Name |
+| `developer` | STRING | Developer Name |
+| `genre` | STRING | Primary Genre |
+| `price` | DECIMAL | App Price |
+| `is_free` | BOOLEAN | Free/Paid indicator |
+
+#### Table: `Dim_Date`
+| Column Name | Type | Description |
+| :--- | :--- | :--- |
+| `date_key` | INT | Primary Key (YYYYMMDD) |
+| `date` | DATE | Full Date |
+| `year` | INT | Year |
+| `month` | INT | Month (1-12) |
+| `month_name` | STRING | Month Name |
+| `day` | INT | Day of Month |
+
+#### Table: `Dim_User`
+| Column Name | Type | Description |
+| :--- | :--- | :--- |
+| `user_key` | INT | Surrogate Primary Key |
+| `user_name` | STRING | User display name |
+| `user_image` | STRING | URL to user profile image |
+
+### 7. Validation Against Analytical Needs
+*   **"Which app has the best ratings?"**:  Query `Fact_Reviews` joined with `Dim_App`, grouping by `Dim_App.title` and averaging `Fact_Reviews.score`.
+*   **"How have reviews changed over time?"**: Query `Fact_Reviews` joined with `Dim_Date`, grouping by `Dim_Date.month` and counting `review_id`.
+*   **"Which developer has the most reviews?"**: Query `Fact_Reviews` joined with `Dim_App`, grouping by `Dim_App.developer`.
+
+This model supports all required analytical capabilities efficiently.
