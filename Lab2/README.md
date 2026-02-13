@@ -18,10 +18,8 @@ graph LR
 ```
 
 ---
+![WhatsApp Image 2026-02-13 at 17 46 36](https://github.com/user-attachments/assets/1fad49f1-0ebd-4575-890d-0e73c4b8354d)
 
-## C. Data Modeling (Kimball Methodology)
-
-We adopt the Kimball methodology to design a dimensional model optimized for analytical queries rather than transaction processing.
 
 ### 1. Identify the Business Process
 We want to analyze the reception of applications by tracking user reviews and ratings over time.
