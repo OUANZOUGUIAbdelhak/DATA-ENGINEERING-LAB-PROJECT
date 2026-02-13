@@ -106,5 +106,3 @@ The "who, what, where, when" context to the facts
 *   **"Which app has the best ratings?"**:  Query `Fact_Reviews` joined with `Dim_App`, grouping by `Dim_App.title` and averaging `Fact_Reviews.score`.
 *   **"How have reviews changed over time?"**: Query `Fact_Reviews` joined with `Dim_Date`, grouping by `Dim_Date.month` and counting `review_id`.
 *   **"Which developer has the most reviews?"**: Query `Fact_Reviews` joined with `Dim_App`, grouping by `Dim_App.developer`.
-
-This model supports all required analytical capabilities efficiently.
